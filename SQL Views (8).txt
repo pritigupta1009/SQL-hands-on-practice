@@ -1,0 +1,52 @@
+create table SALESPEOPLE
+(
+SNUM number(4) constraint pkSNUM primary key,
+SNAME varchar2(10),
+CITY varchar2(10),
+COMM number(3,2)
+);
+
+desc SALESPEOPLE;
+
+create table CUSTOMERS1
+(
+CNUM number(4) constraint pkCNUM primary key,
+CNAME varchar2(10),
+CITY varchar2(10),
+RATING number(4),
+SNUM number(4) constraint fkSNUM references SALESPEOPLE(SNUM)
+);
+
+desc CUSTOMERS1;
+
+create table ORDERS
+(
+ONUM number(4) constraint pkONUM primary key,
+AMT number(6,2),
+ODATE date,
+CNUM number(4) constraint fk_CNUM references CUSTOMERS1(CNUM),
+SNUM number(4) constraint fk_SNUM references SALESPEOPLE(SNUM)
+);
+
+desc ORDERS;
+
+//queries:-
+create view view1 as select * from CUSTOMERS1 where RATING in (select max(RATING) from CUSTOMERS1);
+select * from view1;
+
+create view view2 as select CITY, count(SNAME) as count from SALESPEOPLE group by CITY;
+select * from view2;
+
+create view view3 as select s.SNUM, s.SNAME, avg(o.SNUM) as average, sum(o.SNUM) as total from SALESPEOPLE s join ORDERS o on s.SNUM=o.SNUM group by s.SNUM, s.SNAME;
+select * from view3;
+
+create view view4 as select SNUM, SNAME from SALESPEOPLE natural join CUSTOMERS1;
+select * from view4;
+
+drop view xyz;
+
+create view SALESPEOPLE_CUSTOMERS1_ORDERS as select s.SNAME, c.CNAME, o.ONUM from SALESPEOPLE s join ORDERS o on s.SNUM=o.SNUM join CUSTOMERS1 c on o.CNUM=c.CNUM;
+select * from SALESPEOPLE_CUSTOMERS1_ORDERS;
+
+create view xyz as select SNUM, COMM from SALESPEOPLE where COMM between 1000 and 2000;
+grant insert, update on xyz to usr1;

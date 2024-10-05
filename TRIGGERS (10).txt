@@ -1,0 +1,51 @@
+create table Employee1
+(
+eid number(2) primary key,
+ename varchar2(15),
+city varchar2(10),
+desig varchar2(10),
+sal number(5),
+perks number (4)
+);
+
+create or replace trigger trgsal
+before insert or update on employee1
+for each row when (new.perks>500)
+begin
+:new.sal:=:new.sal-300;
+end;
+
+create or replace trigger trgsal
+before insert or update on Employee1
+for each row 
+begin
+if :new.sal<=500 then
+:new.sal:=10000;
+else
+:new.sal:=15000;
+end if;
+end;
+
+insert into Employee1 values(:eid, :ename, :city, :desig, :sal, :perks);
+select * from Employee1;
+update Employee1 set sal=sal+1000 where eid=40;
+
+
+create table studata(
+sid number(2) primary key,
+sname varchar2(15));
+
+create table studata_backup(
+sid number(2) primary key,
+sname varchar2(15));
+
+create or replace trigger trgstu
+after insert on studata
+for each row
+begin
+insert into studata_backup values(:new.sid,:new.sname);
+end;
+
+insert into studata values(:sid, :sname);
+select * from studata;
+select * from studata_backup;

@@ -1,0 +1,192 @@
+//Q1
+create table account
+(
+accno number(12) constraint pk_accno primary key,
+bal number(8,2)
+);
+desc account;
+insert into account values(:accno, :bal);
+select * from account;
+
+declare
+  account_no account.accno%type;
+  balance account.bal%type;
+  minbal number := 500;
+begin
+  account_no := :account_no;
+  select bal into balance from account where accno = account_no;
+  dbms_output.put_line('old balance: '||balance);
+  if balance < minbal then
+    balance := balance - 100;
+  else
+    balance := balance;
+  end if;
+  dbms_output.put_line('new balance: '||balance);
+end;
+
+
+//Q2
+declare
+  ename EMP1.ENAME%type;
+  hdate EMP1.HIREDATE%type;
+  empno EMP1.EMPNO%type;
+begin
+  for i in (select EMPNO, ENAME, HIREDATE from EMP1 where HIREDATE like '__/__/0081') loop
+    ename := substr(i.ENAME,0,3);
+    empno := i.EMPNO;
+    hdate := i.HIREDATE;
+    dbms_output.put_line('employee id: '||empno||', employee name: '||ename||', hire date: '||hdate);
+  end loop;
+end;
+
+
+//Q3
+declare
+  ename EMP1.ENAME%type;
+  empno EMP1.EMPNO%type;
+  sal EMP1.SAL%type;
+begin
+  for i in (select EMPNO, ENAME, SAL from (select * from EMP1 order by SAL desc) where rownum < 8) loop
+    ename := i.ENAME;
+    empno := i.EMPNO;
+    sal := i.SAL;
+    dbms_output.put_line('employee id: '||empno||', employee name: '||ename||', salary: '||sal);
+  end loop;
+end;
+
+
+//Q4
+create table bonus
+(
+EmpNo Number(5),
+EName Varchar2(30),
+Job Varchar2(15),
+Sal Number(7),
+Bonus Number(9,2),
+constraint pk_bouns primary key(EmpNo),
+constraint fk_bouns foreign key(EmpNo) references EMP1(EmpNo)
+);
+
+declare
+  ename EMP1.ENAME%type;
+  empno EMP1.EMPNO%type;
+  sal EMP1.SAL%type;
+  job DEPT1.DNAME%type;
+  bonus number(9,2);
+begin
+  for i in (select e.EMPNO, e.ENAME, e.SAL from EMP1 e join DEPT1 d on e.DEPTNO=d.DEPTNO where e.SAL <= 15000 and d.LOC like 'Chicago') loop
+    ename := i.ENAME;
+    empno := i.EMPNO;
+    bonus := i.SAL*0.20;
+    sal := bonus + i.SAL;
+    job := 'Chicago';
+    dbms_output.put_line('employee id: '||empno||', employee name: '||ename||', salary: '||i.SAL||', bonus: '||bonus||', bonus+salary: '||sal);
+    insert into bonus values(empno,ename,job,sal,bonus);
+    commit;
+  end loop;
+end;
+select * from bonus;
+
+
+//Q5
+create sequence EMP_SEQ start with 1 increment by 1;
+
+declare
+  empno_1 EMP1.EMPNO%type;
+  empno_2 EMP1.EMPNO%type;
+  lowest_salary number(7,2);
+begin
+  select MIN(SAL) into lowest_salary from EMP1;
+  insert into EMP1 (EMPNO, ENAME, JOB, MGR, HIREDATE, SAL, DEPTNO) values (EMP_SEQ.NEXTVAL, 'Employee_1', 'Grade 2', NULL, SYSDATE, lowest_salary, 
+ (select DEPTNO from DEPT1 WHERE LOC = 'Boston'));
+  insert into EMP1 (EMPNO, ENAME, JOB, MGR, HIREDATE, SAL, DEPTNO) values (EMP_SEQ.NEXTVAL, 'Employee_2', 'Grade 5', NULL, SYSDATE, lowest_salary,  
+ (select DEPTNO from DEPT1 WHERE LOC = 'Boston'));
+  commit;
+  dbms_output.put_line('Two employees have been inserted into the Boston office with the lowest remuneration possible.');
+end;
+select * from EMP1;
+
+
+//Q6
+CREATE TABLE EMP_SALARY_GRADE (
+    EMPNO NUMBER(6),
+    SALARY NUMBER(8,2),
+    GRADE NUMBER(2),
+    CONSTRAINT PK_EMP_SALARY_GRADE PRIMARY KEY (EMPNO),
+    CONSTRAINT FK_EMP_SALARY_GRADE_EMPNO FOREIGN KEY (EMPNO) REFERENCES EMP1 (EMPNO)
+);
+
+DECLARE
+  v_grade NUMBER(2);
+  v_salary_hike NUMBER(5, 2);
+BEGIN
+  FOR i IN 1..5 LOOP
+    CASE i
+      WHEN 1 THEN 
+        v_grade := i;
+        v_salary_hike := 0.15;
+      WHEN 2 THEN 
+        v_grade := i;
+        v_salary_hike := 0.12;
+      WHEN 3 THEN 
+        v_grade := i;
+        v_salary_hike := 0.10;
+      WHEN 4 THEN 
+        v_grade := i;
+        v_salary_hike := 0.10;
+      WHEN 5 THEN 
+        v_grade := i;
+        v_salary_hike := 0.05;
+    END CASE;
+      UPDATE EMP1 SET SAL = SAL + SAL * v_salary_hike WHERE JOB LIKE '%' || v_grade || '%';
+    END LOOP;
+    COMMIT;
+    DBMS_OUTPUT.PUT_LINE('Salary hike applied successfully.');
+EXCEPTION
+  WHEN OTHERS THEN
+    DBMS_OUTPUT.PUT_LINE('An error occurred: ' || SQLERRM);
+    ROLLBACK;
+END;
+
+
+//Q7
+CREATE TABLE EMP_SALARY_HISTORY (
+    EMPNO NUMBER(6),
+    OLD_SALARY NUMBER(8,2),
+    NEW_SALARY NUMBER(8,2),
+    CHANGE_DATE DATE,
+    CONSTRAINT PK_EMP_SALARY_HISTORY PRIMARY KEY (EMPNO, CHANGE_DATE),
+    CONSTRAINT FK_EMP_SALARY_HISTORY_EMPNO FOREIGN KEY (EMPNO) REFERENCES EMP1 (EMPNO)
+);
+
+DECLARE
+    v_old_salary EMP1.SAL%TYPE;
+BEGIN
+    FOR emp_record IN (SELECT EMPNO, SAL FROM EMP1) LOOP
+        -- Get the old salary
+        v_old_salary := emp_record.SAL;
+
+        -- Calculate the new salary (you can modify this part based on your logic)
+        -- For example, you can apply a fixed percentage increase here
+        -- Let's assume a 10% increase for all employees
+        UPDATE EMP1
+        SET SAL = SAL * 1.10 
+        WHERE EMPNO = emp_record.EMPNO;
+
+        -- Insert the old salary information into the history table
+        INSERT INTO EMP_SALARY_HISTORY (EMPNO, OLD_SALARY, NEW_SALARY, CHANGE_DATE)
+        VALUES (emp_record.EMPNO, v_old_salary, emp_record.SAL, SYSDATE);
+    END LOOP;
+
+    -- Commit the transaction
+    COMMIT;
+
+    -- Output success message
+    DBMS_OUTPUT.PUT_LINE('Employee records updated successfully.');
+EXCEPTION
+    WHEN OTHERS THEN
+        -- Output error message if an exception occurs
+        DBMS_OUTPUT.PUT_LINE('An error occurred: ' || SQLERRM);
+        ROLLBACK;
+END;
+

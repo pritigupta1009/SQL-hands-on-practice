@@ -1,0 +1,128 @@
+create table SAILORS
+(
+s_id varchar2(5) constraint pk_s_id primary key,
+s_name varchar2(20),
+rating number(5),
+age number(2)
+);
+
+desc SAILORS;
+
+create table BOATS
+(
+b_id varchar2(5) constraint pk_b_id primary key,
+b_name varchar2(20),
+color varchar2(10)
+);
+
+desc BOATS;
+
+create table RESERVES
+(
+s_id varchar2(5) constraint fk_s_id references SAILORS(s_id),
+b_id varchar2(5) constraint fk_b_id references BOATS(b_id),
+day varchar2(10),
+constraint composite_pk primary key(s_id, b_id)
+);
+
+desc RESERVES;
+
+insert into SAILORS values('1000', 'Tarun', 4, 35);
+insert into SAILORS values('1001', 'Jack Sparrow', 3, 20);
+insert into SAILORS values('1002', 'Rose', 5, 55);
+insert into SAILORS values('1003', 'Nihal', 5, 65);
+
+select * from SAILORS;
+drop table SAILORS;
+
+insert into BOATS values('5000', 'BLack Pearl', 'Golden');
+insert into BOATS values('5001', 'Titanic', 'Red');
+insert into BOATS values('5002', 'Flying Dutchman', 'Black');
+insert into BOATS values('5003', 'Interceptor', 'Green');
+
+select * from BOATS;
+drop table BOATS;
+
+insert into RESERVES values('1000', '5000', 'Tuesday');
+insert into RESERVES values('1001', '5003', 'Monday');
+insert into RESERVES values('1000', '5002', 'Sunday');
+insert into RESERVES values('1002', '5001', 'Friday');
+
+select * from RESERVES;
+drop table RESERVES;
+
+select b.color from SAILORS s join RESERVES r on s.s_id = r.s_id join BOATS b on b.b_id = r.b_id where s.s_name like 'Tarun';
+select s.s_id, s.s_name from SAILORS s join RESERVES r on s.s_id = r.s_id where r.day like 'Monday';
+select b_id, b_name from BOATS where color = 'Red' or color = 'Green';
+delete from SAILORS where age>60;
+
+
+
+create table Teacher
+(
+Tid number(5) constraint pk_Tid primary key,
+Name varchar2(20), 
+Dept varchar2(20)
+);
+
+desc Teacher;
+
+create table Subject
+(
+Subno number(5) constraint pk_Subno primary key,
+Subtitle varchar2(20)
+);
+
+desc Subject;
+
+create table TaughtBy
+(
+Tid number(5) constraint fk_Tid references Teacher(Tid),
+Subno number(5) constraint fk_Subno references Subject(Subno),
+constraint compositePK primary key(Tid, Subno)
+);
+
+desc TaughtBy;
+
+create table Student
+(
+Rollno number(5) constraint pk_Rollno primary key,
+Sname varchar2(20),
+City varchar2(20)
+);
+
+desc Student;
+
+insert into Teacher values(1001, 'Raj', 'IT');
+insert into Teacher values(1002, 'Niharika', 'Physics');
+insert into Teacher values(1003, 'Raman', 'ECE');
+insert into Teacher values(1004, 'Ankita', 'Physics');
+
+select * from Teacher;
+
+insert into Subject values(100, 'DBMS');
+insert into Subject values(200, 'Thermodynamics');
+insert into Subject values(300, 'Algorithms');
+
+select * from Subject;
+
+insert into TaughtBy values(1002, 200);
+insert into TaughtBy values(1004, 200);
+insert into TaughtBy values(1001, 100);
+insert into TaughtBy values(1001, 300);
+insert into TaughtBy values(1003, 300);
+
+select * from TaughtBy;
+
+insert into Student values(15, 'Priti', 'Kolkata');
+insert into Student values(22, 'Aditi', 'Kolkata');
+insert into Student values(24, 'Rubi', 'Kolkata');
+insert into Student values(30, 'Ram', 'Chennai');
+insert into Student values(8, 'Ankit', 'Mumbai');
+
+select * from Student;
+
+select t.Name from Teacher t join TaughtBy tb on t.Tid=tb.Tid join Subject s on s.Subno=tb.Subno where s.Subtitle='Thermodynamics' and t.Dept='Physics';
+update Subject set Subtitles = 'RDBMS' where Subtitles = 'DBMS';
+select * from Student where City like 'Kolkata' and Rollno between 20 and 25;
+select * from Student where City like 'Kolkata' order by Rollno desc;

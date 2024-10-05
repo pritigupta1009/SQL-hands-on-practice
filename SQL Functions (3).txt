@@ -1,0 +1,34 @@
+desc dual;
+select systimestamp from dual;
+select 2*2 from dual;
+select abs(-15) from dual;
+select sqrt(5) from dual;
+select round(15.19) from dual;
+select lower('IVAN BAYROSS') from dual;
+select upper('ivan bayross') from dual;
+select add_months(sysdate, 5) from dual;
+select round(months_between('JUL-02-01', 'JAN-02-01')) from dual;
+select to_char(sysdate, 'DD/MM/YYYY') from dual;
+
+select * from EMP1;
+Select * from DEPT1;
+Select * from user_constraints where table_name='EMP1';
+Desc EMP1;
+
+Alter Table EMP1 Add Constraint CH_EMPNO_EMP Check(EMPNO Between 7000 And 8000);
+Alter Table EMP1 Add Constraint CH_ENAME_EMP Check(length(ENAME)<=10);
+alter table EMP1 add DEPT_NAME varchar2(20);
+alter table EMP1 drop column DEPT_NAME;
+Alter Table EMP1 Add Constraint CH_COMM_EMP Check((JOB='Salesman' and COMM<1500) or (JOB<>'Salesman' and COMM=NULL));
+
+
+select ENAME from EMP1 where ENAME like '_i%';
+select ENAME, JOB from EMP1 where JOB not like '%Manager%';
+select max(SAL) as Maximum, min(SAL) as Minimum, sum(SAL) as Total, avg(SAL) as Average from EMP1; 
+select JOB, max(SAL) as Maximum, min(SAL) as Minimum, sum(SAL) as Total, avg(SAL) as Average from EMP1 group by JOB; 
+select count(EMPNO) as NumberOfManagers from EMP1 where JOB like '%Manager%';
+select EMPNO, ENAME, HIREDATE from EMP1 where HIREDATE > '01/01/0080';
+select ENAME from EMP1 where SAL=(select max(SAL) from EMP1 where JOB like '%Salesman%');
+select ENAME from EMP1 where SAL=(select min(SAL) from EMP1 where JOB like '%Clerk%');
+select DNAME from EMP1 e join DEPT1 d on e.DEPTNO = d.DEPTNO where e.SAL = (select max(SAL) from EMP1);
+select ENAME from EMP1 where SAL > (select SAL from EMP1 where ENAME like 'Turner');

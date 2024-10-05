@@ -1,0 +1,50 @@
+create table customers
+(
+customerid number(2) primary key,
+customername varchar2(20),
+contactname varchar2(20),
+address varchar2(20),
+city varchar2(20),
+postalcard number(5),
+country varchar2(20)
+);
+
+desc customers;
+
+create table suppliers
+(
+supplierid number(2) primary key,
+suppliername varchar2(20),
+contactname varchar2(20),
+address varchar2(20),
+city varchar2(20),
+postalcode number(5),
+country varchar2(20)
+);
+
+desc suppliers;
+
+insert into customers values(1, 'Alfreds Futter', 'Maria Anders', 'Obere Str.57', 'Berlin', 12209, 'Germany');
+insert into customers values(2, 'Ana Helados', 'Ana Trujillo', 'Avda. Const on 2222', 'Mexico D.F', 05021, 'Mexico');
+insert into customers values(3, 'Antonio Moreno', 'Antonio Moreno', 'Matadero s 2312', 'Mexico D.F', 05023, 'Mexico');
+
+select * from customers;
+
+insert into suppliers values(1, 'Exotic Liquid', 'Charlotte Cooper', '49 Gilbert St.', 'Berlin', 12209, 'Germany');
+insert into suppliers values(2, 'New Orleans KDelight', 'Shelly Burke', 'P.O. Box 78934', 'Mexico D.F', 05023, 'Mexico');
+insert into suppliers values(3, 'Kellys Homestead', 'Regina Murphy', '707 Oxford Rd.', 'Ann Arbor', 48104, 'USA');
+
+select * from suppliers;
+
+select city from suppliers union select city from customers;
+
+select city from suppliers union all select city from customers;
+
+select city from suppliers where country like 'Germany' union all select city from customers where country like 'Germany';
+
+select customername as name from customers where city in(select city from customers intersect select city from suppliers) union select suppliername as name from suppliers where city in(select city from customers intersect select city from suppliers);
+
+//4 // select c.customername, s.suppliername from customers c join suppliers s on c.city=s.city;
+//4 // select customername from customers where city in(select city from customers intersect select city from suppliers);
+
+select country from suppliers minus select country from customers;

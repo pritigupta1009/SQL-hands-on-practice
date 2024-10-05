@@ -1,0 +1,151 @@
+create table Client_Master
+(
+Client_no varchar2(6) constraint pkClient_no_client_master primary key constraint chClient_no_client_master check(Client_no like 'C%'),
+Name varchar2(20) constraint nn_Name_Client_Master not null,
+City varchar2(15),
+Pincode varchar2(8),
+State varchar2(15),
+Bal_due number(10,2)
+);
+
+desc Client_Master;
+
+SELECT CONSTRAINT_NAME, CONSTRAINT_TYPE, TABLE_NAME FROM USER_CONSTRAINTS WHERE TABLE_NAME = 'Client_Master';
+desc user_constraints;
+SELECT * FROM USER_CONSTRAINTS;
+
+create table product_master
+(
+Product_no varchar2(6) constraint pkProduct_no primary key constraint chProduct_no check(Product_no like 'P%'),
+Description varchar2(15) constraint nn_Description not null,
+Profit_percent number(4,2) constraint nn_Profit_percent not null,
+Unit_measure varchar2(10) constraint nn_Unit_measure not null,
+Qty_on_hand number(8) constraint nn_Qty_on_hand not null,
+Reorder_lvl number(8) constraint nn_Reorder_lvl not null,
+Sell_price number(8,2) constraint nn_Sell_price not null constraint chSell_price check(Sell_price>0),
+Cost_price number(8,2) constraint nn_Cost_price not null constraint chCost_price check(Cost_price>0)
+);
+
+desc product_master;
+
+create table salesman_master
+(
+Salesman_no varchar2(6) constraint pkSalesman_no primary key constraint chSalesman_no check(Salesman_no like 'S%'),
+Salesman_name varchar2(20) constraint nn_Salesman_name not null,
+Address1 varchar2(10) constraint nn_Address1 not null,
+Address2 varchar2(10),
+City varchar2(20),
+Pincode number(7),
+State varchar2(20), 
+Sal_amt number(8,2) constraint nn_Sal_amt not null constraint chSal_amt check(Sal_amt<>0),
+Tgt_to_get number(6,2) constraint nn_Tgt_to_get not null constraint chTgt_to_get check(Tgt_to_get<>0),
+Ydt_sales number(6,2) constraint nn_Ydt_sales not null,
+Remarks varchar2(20)  
+);
+
+desc salesman_master;
+
+create table sales_order
+(
+Order_no varchar2(6) constraint pkOrder_no primary key constraint chOrder_no check(Order_no like 'O%'),
+Order_date date,
+Client_no varchar2(6) constraint fkClient_no references Client_Master(Client_no),
+Dely_address varchar2(25),
+Salesman_no varchar2(6) constraint fkSalesman_no references salesman_master(Salesman_no),
+Dely_type char(1) default 'F' constraint chDely_type check(Dely_type = 'P' or Dely_type = 'F'),
+Billed_yn char(1),
+Dely_date date,
+Order_status  varchar2(10) constraint chOrder_status check(Order_status in('in process','fulfilled','backorder','cancelled')),
+constraint chDely_date check(Order_date<Dely_date)
+);
+
+desc sales_order;
+drop table sales_order;
+
+create table sales_order_details
+(
+Order_no varchar2(6) constraint fkOrder_no references sales_order(Order_no),
+Product_no varchar2(6) constraint fkProduct_no references product_master(Product_no),
+Qty_ordered number(8),
+Qty_disp number(8),
+Product_rate number(10,2),
+
+constraint pkOrder_Product_no primary key(Order_no , Product_no)
+);
+
+desc sales_order_details;
+drop table sales_order_details;
+
+
+insert into Client_Master values('C00001', 'Ivan Bayross', 'Mumbai', 400054, 'Maharashtra', 15000);
+insert into Client_Master values('C00002', 'Mamta Mazumdar', 'Madras', 780001, 'Tamil Nadu', 0);
+insert into Client_Master values('C00003', 'Chhaya Bankar', 'Mumbai', 400057 ,'Maharashtra', 5000);
+insert into Client_Master values('C00004', 'Ashwini Joshi', 'Bangalore', 560001, 'Karnataka', 0);
+insert into Client_Master values('C00005', 'Hansel Colaco', 'Mumbai', 400060, 'Maharashtra', 2000);
+insert into Client_Master values('C00006' ,'Deepak Sharma' ,'Mangalore', 560050 ,'Karanataka', 0);
+
+Select * from Client_Master;
+
+insert into product_master values('P08865' ,'Skirts' ,5, 'Piece' ,75, 30, 450, 300);
+insert into product_master values('P07975' ,'Lyers Tops' ,5, 'Piece' ,70, 30, 300, 175);
+insert into product_master values('P07965' ,'Denim Shirts', 4, 'Piece', 100, 40, 350, 250);
+insert into product_master values('P07885', 'PuM-Overs', 2.5, 'Piece', 80, 30, 700, 450);
+insert into product_master values('P07868', 'Trousers', 2, 'Piece', 150, 50, 850, 550);
+insert into product_master values('P07865', 'Jeans', 5, 'Piece', 100, 20, 750, 500);
+insert into product_master values('P06734', 'Cotton Jeans', 5 ,'Piece', 100, 20, 600, 450);
+insert into product_master values('P0345', 'Shirts', 6, 'Piece', 150, 50, 500, 350);
+insert into product_master values('P00001', 'T-Shirts', 5, 'Piece', 200, 50, 350, 250);
+
+Select * from product_master;
+
+insert into salesman_master values('S00004','Ashish' ,'A/5' ,'Juhu' ,'Mumbai' ,400044, 'Maharashtra' ,3500 ,200 ,150, 'Good');
+insert into salesman_master values('S00003', 'Raj', 'P-7', 'Bandra', 'Mumbai', 400032, 'Maharashtra', 3000, 200, 100, 'Good');
+insert into salesman_master values('S00002', 'Omkar' ,65 ,'Nariman' ,'Mumbai', 400001, 'Maharashtra' ,3000, 200, 100, 'Good');
+insert into salesman_master values('S00001', 'Aman', 'A/14', 'Worli', 'Mumbai', 400002, 'Maharashtra',3000, 100, 50, 'Good'); 
+
+Select * from salesman_master;
+
+insert into sales_order(Order_no, Client_no, Dely_date, Salesman_no, Dely_type, Billed_yn, Order_date, Order_status) values('O19008', 'C00005', '05/24/2004', 'S00004', 'F', 'N', '07/26/2002', 'in process');
+insert into sales_order(Order_no, Client_no, Dely_date, Salesman_no, Dely_type, Billed_yn, Order_date, Order_status) values('O46866', 'C00004', '05/20/2004', 'S00002', 'P', 'N', '05/22/2002', 'cancelled');
+insert into sales_order(Order_no, Client_no, Dely_date, Salesman_no, Dely_type, Billed_yn, Order_date, Order_status) values('O19003', 'C00001', '04/03/2004', 'S00001', 'F', 'Y', '04/07/2002', 'fulfilled');
+insert into sales_order(Order_no, Client_no, Dely_date, Salesman_no, Dely_type, Billed_yn, Order_date, Order_status) values('O46865', 'C00003', '02/18/2004', 'S00003', 'F', 'Y', '02/20/2002', 'fulfilled');
+insert into sales_order(Order_no, Client_no, Dely_date, Salesman_no, Dely_type, Billed_yn, Order_date, Order_status) values('O19002', 'C00002', '06/25/2004', 'S00002', 'P', 'N', '06/27/2002', 'cancelled');
+insert into sales_order(Order_no, Client_no, Dely_date, Salesman_no, Dely_type, Billed_yn, Order_date, Order_status) values('O19001', 'C00001', '06/12/2004', 'S00001', 'F', 'N', '07/20/2002','in process');
+
+delete from sales_order where Order_no='O19001';
+Select * from sales_order;
+
+insert into sales_order_details values('O19008' ,'P07975', 5 ,3 ,1050);
+insert into sales_order_details values('O19008' ,'P00001' ,10 ,5 ,525);
+insert into sales_order_details values('O46866' ,'P07975' ,1, 0 ,1050);
+insert into sales_order_details values('O46866', 'P07965', 1, 0, 8400);
+insert into sales_order_details values('O19003' ,'P06734' ,1 ,1 ,12000);
+insert into sales_order_details values('O19003', 'P0345' ,2 ,2 ,1050);
+insert into sales_order_details values('O46865', 'P0345', 4, 4, 1050);
+insert into sales_order_details values('O46865', 'P00001', 10, 10, 525);
+insert into sales_order_details values('O46865' ,'P07885' ,3 ,1 ,5250);
+insert into sales_order_details values('O46865' ,'P07868' ,3 ,3 ,3150);
+insert into sales_order_details values('O19002' ,'P00001' ,10 ,0 ,525);
+insert into sales_order_details values('O19001' ,'P07885' ,2 ,1 ,5250);
+insert into sales_order_details values('O19001', 'P07965' ,2 ,1 ,8400);
+insert into sales_order_details values('O19001', 'P00001', 4 ,4 ,525);
+
+Select * from sales_order_details;
+
+
+select Client_no, Name from Client_Master where Name like '_a%';
+select Client_no, Name, City from Client_Master where City like '_a%';
+select Client_no, Name, City from Client_Master where City in('Bombay', 'Delhi');
+select Client_no, Name, Bal_due from Client_Master where Bal_due>10000;
+select * from sales_order where to_char(Order_date, 'MM')='01';
+//select * from sales_order where Order_date like '07/__/____';
+select * from sales_order where Client_no in ('C00001', 'C00002');
+select * from product_master where Sell_price>2000 and Sell_price<=5000;
+select Product_no, Description, Profit_percent, Unit_measure, Qty_on_hand, Reorder_lvl, Sell_price*1.5 as New_price, Cost_price from product_master where Sell_price>1500;
+select Name, City, State from Client_Master where State <> 'Maharashtra';
+select count(*) from sales_order;
+select avg(Sell_price) from product_master;
+select max(Sell_price) as max_price, min(Sell_price) as min_price from product_master;
+select count(Product_no) from product_master where Sell_price>=1500;
+select * from product_master where Qty_on_hand < Reorder_lvl;
+select Order_no, Order_date from sales_order;

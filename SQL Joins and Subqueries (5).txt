@@ -1,0 +1,114 @@
+create table ab
+(
+a varchar2(20),
+b varchar2(20)
+);
+insert into ab values(:a,:b);
+select * from ab;
+select 1 from ab;
+
+insert all
+into ab values('a','b')
+into ab values('c','d')
+into ab values('e','f')
+select * from dual;
+---------------------------------------------------------------------------------
+create table zipcode
+(
+zip number(6) constraint pk_zip primary key,
+city varchar2(20)
+);
+
+desc zipcode;
+
+create table employees
+(
+eno number(4) constraint pk_eno primary key,
+ename varchar2(20),
+zip number(6) constraint fk_zip_employees references zipcode(zip),
+hdate date
+);
+
+desc employees;
+
+create table parts
+(
+pno number(4) constraint pk_pno primary key,
+pname varchar2(20),
+qoh number(4),
+price number(6,2),
+lvl number(4)
+);
+
+desc parts;
+drop table parts;
+
+create table customer
+(
+cno number(4) constraint pk_cno primary key,
+cname varchar2(20),
+street number(20),
+zip number(6) constraint fk_zip_customer references zipcode(zip),
+phone number(10)
+);
+
+desc customer;
+
+create table orders1
+(
+ono number(4) constraint pk_ono primary key,
+cno number(4) constraint fk_cno_orders references customer(cno),
+eno number(4) constraint fk_eno_orders references employees(eno),
+received varchar2(4),
+shipped varchar2(4)
+);
+
+desc orders1;
+
+create table odetails
+(
+ono number(4) constraint fk_ono_odetails references orders1(ono),
+pno number(4) constraint fk_pno_odetails references parts(pno),
+qty number(4),
+constraint pk_ono_pno primary key(ono, pno)
+);
+
+desc odetails;
+
+insert into zipcode values(711101, 'Howrah');
+insert into zipcode values(700089, 'Kolkata');
+insert into zipcode values(826145, 'Mumbai');
+select * from zipcode;
+
+insert into employees values(1001, 'Simran', 711101, '09/10/2003');
+insert into employees values(1002, 'Raj', 700089, '07/25/2002');
+select * from employees ;
+
+insert into parts values(2001, 'Pens', 100, 10, 50);
+insert into parts values(2002, 'Box', 300, 50, 10);
+select * from parts ;
+
+insert into customer values(3001, 'Sanvi', 5, 711101, '7846652696');
+insert into customer values(3002, 'Prerna', 2, 826145, '8529674100');
+select * from customer ;
+
+insert into orders1 values(5001, 3001, 1001, 'yes', 'yes');
+insert into orders1 values(5002, 3002, 1002, 'no', 'yes');
+insert into orders1 values(5003, 3001, 1002, 'no', 'no');
+select * from orders1;
+
+insert into odetails values(5001, 2001, 20);
+insert into odetails values(5002, 2002, 10);
+select * from odetails;
+
+select pno, pname from parts where price<20;
+select p.pno from parts p join odetails od on p.pno=od.pno where exists(select * from odetails);
+//select distinct pno from odetails;
+select * from customer where cname like 'S%';
+select o.ono, c.cname from customer c join orders1 o on c.cno=o.cno where o.shipped like'no';
+select cname, ename from customer c join orders1 o on c.cno=o.cno join employees e on e.eno=o.eno;
+select ename from employees where hdate=(select min(hdate) from employees);
+select pno, pname, price from parts where price > 20000 order by pno asc;
+select p.pno, p.pname, sum(p.price*o.qty) from parts p join odetails o on p.pno=o.pno group by p.pno, p.pname;
+select sum(qty) from odetails where pno=10601;
+select e.eno from employees e join zipcode z on e.zip=z.zip where z.city like 'Mumbai';

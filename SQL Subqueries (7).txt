@@ -1,0 +1,19 @@
+//from assignment 1 
+//queries:-
+
+select ENAME from EMP1 where SAL=(select max(SAL) from EMP1);
+select ENAME from EMP1 where SAL in (select max(SAL) from EMP1 where JOB like '%Salesman%');
+select ENAME from EMP1 where SAL=(select min(SAL) from EMP1 where JOB like '%Clerk%');
+select DNAME from DEPT1 where DEPTNO=(select DEPTNO from EMP1 group by DEPTNO having avg(SAL)=(select max(avgsal) from (select DEPTNO, avg(SAL) as avgsal from EMP1 group by DEPTNO)));
+select ENAME from EMP1 where SAL>(select SAL from EMP1 where ENAME like 'Turner');
+select ENAME from EMP1 where HIREDATE>(select HIREDATE from EMP1 where ENAME like 'Allen');
+select DNAME from DEPT1 where DEPTNO=(select DEPTNO from EMP1 where ENAME like 'Ford');
+select DNAME from DEPT1 where DEPTNO=(select DEPTNO from EMP1 where SAL=(select max(SAL) from EMP1));
+select LOC from DEPT1 where DEPTNO=(select DEPTNO from EMP1 where ENAME like 'Smith');
+select LOC from DEPT1 where DEPTNO in (select DEPTNO from EMP1 where JOB like '%Manager%');
+select JOB from EMP1 where ENAME like 'Martin';
+select ENAME from EMP1 where SAL>(select max(SAL) from EMP1 where DEPTNO=(select DEPTNO from DEPT1 where LOC like '%Dallas%'));
+select DNAME from DEPT1 where DEPTNO not in (select distinct DEPTNO from EMP1);
+select ENAME from EMP1 where HIREDATE in (select HIREDATE from EMP1 where ENAME like 'Adams') and ENAME not like 'Adams';
+select DNAME from DEPT1 where DEPTNO in (select DEPTNO from EMP1 where COMM is not null);
+select ENAME from EMP1 where SAL in (select min(SAL) from EMP1 group by DEPTNO);
